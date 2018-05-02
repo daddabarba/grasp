@@ -1,9 +1,11 @@
 import sys
 import os
 
+import cPickle
+
 from sklearn.svm import SVC
 
-import convertDataset as cd
+import classifier
 import pars
 
 def getTargetFol(fol,y):
@@ -25,16 +27,8 @@ else:
 	if(len(sys.argv)>4 and sys.argv[4]=="False"):
 		local = False
 
-	print "Converting folder to data-set Matrix"
-	X,y = cd.getDataSet(fol, nClasses, blockSize=pars.BLOCK_SIZE, cellSize=pars.CELL_SIZE, local=local)
+	
+	clf = classifier.classifier(nClasses, binary=binary)
 
-
-	print "Test case extracted\n\n"
-
-	for example in range(nData)
-		print "x: " + str(X[example]) + "\ty: " + str(y[example])
-
-	print "\n\n"
-
-	print "Instanciating classifier":
-	print "Training SVC..."
+	clf.train(fol)
+	clf.save()

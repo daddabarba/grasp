@@ -15,12 +15,18 @@ b = time.time()
 #Just get the Features
 H = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
 cells_per_block=(2, 2), transform_sqrt=True, block_norm="L2-Hys",
-visualise=False)
+visualise=False, feature_vector=False)
+
+
 
 #Get the Features and also the image showing the HoG features
 H, hog_image = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
 cells_per_block=(2, 2), transform_sqrt=True, block_norm="L2-Hys",
-visualise=True)
+visualise=True, feature_vector=False)
+
+vBlocks, hBlocks, vCells, hCells, histSize =  H.shape
+
+print vBlocks
 
 cv2.imshow("Image", img)
 cv2.imshow("HoG Image", hog_image)

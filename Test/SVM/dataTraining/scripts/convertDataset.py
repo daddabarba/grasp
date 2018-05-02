@@ -53,10 +53,6 @@ def folToMat(fol, target, blockSize = (2,2), cellSize = (8,8), prev=None):
 		target = np.concatenate(y,targets)
 
 	return (inputs, targets)
-
-def getTargetFol(fol,y):
-	return fol+'/'+str(y)
-
 #MAIN
 
 def getDataSet(fol, nClasses, blockSize = (2,2), cellSize = (8,8), local=True, binary=False):

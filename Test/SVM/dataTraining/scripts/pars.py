@@ -1,0 +1,2 @@
+BLOCK_SIZE = (2,2)
+CELL_SIZE = (8,8)

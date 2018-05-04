@@ -6,6 +6,8 @@ import convertDataset as cd
 
 import pars
 
+import numpy as np
+
 import cv2
 import cPickle
 
@@ -42,8 +44,10 @@ class classifier:
 
 
 	def getData(self, fol, local=True):
+		location = self.getBlockPos(pars.TRAINING_LOCATION)
+
 		print "retreiving data from folder " + fol
-		return cd.getDataSet(fol, self.nClasses, self.blockSize, self.cellSize, local=local, binary=self.binary)
+		return cd.getDataSet(fol, location, self.nClasses, self.blockSize, self.cellSize, local=local, binary=self.binary)
 
 	def train(self, fol, local=True):
 		print "Retreiving training data"
@@ -63,6 +67,8 @@ class classifier:
 			print "Converting to list"
 			imgs = [imgs]
 
+		locations = [self.getBlockPos(loc) for loc in locations]
+
 		print "Classifying"
 		return self.predict(cd.getTestCases(imgs, locations = locations, blockSize=self.blockSize, cellSize=self.cellSize))
 
@@ -72,6 +78,18 @@ class classifier:
 			x = [x]
 
 		return self.svc.predict(x)
+
+
+	def getBlockPos(self, position):
+		return self.blockTrainPosition(self.cellSize, self.blockSize, position)
+
+	def blockTrainPosition(self, pixel_per_cell, cells_per_block, position):
+		ppc = np.array(pixel_per_cell)
+		cpb = np.array(cells_per_block)
+		size = ppc * cpb
+		p = np.array(position)
+		return (p - size / 2) // ppc
+
 
 	def save(self):
 		print "Saving at " + self.loc

@@ -1,64 +1,43 @@
-import os
+import svm
 
-import convertDataset as cd
-#import featureExtraction as fe
-
-import Image
-
-import cPickle
+import pars
 
 class classifier:
 
-	def __init__(self, nClasses, blockSize=pars.BLOCK_SIZE, cellSize=pars.CELL_SEIZE, loc=None, binary=False):
-		self.nClasses = nClasses
+	def __init__(self, nClasses):
 
-		self.blockSize = blockSize
-		self.cellSize = cellSize
-
-		self.binary = binary
-
-		self.loc = os.path.dirname(os.path.realpath(__file__)) + '/svc_pickle'
-
-		self.svc = SVC()
-
-		if loc:
-			self.loc = os.path.dirname(os.path.realpath(__file__)) + '/' + loc
-
-		if os.path.exists(self.loc):
-			self.load()
+		print "Initializing classifier"
+		self.orientation = svm.classifier(nClasses, blockSize=pars.BLOCK_SIZE, cellSize=pars.CELL_SIZE, loc='orientation')
+		print "Initializing filters"
+		self.coarse_filter = svm.classifier(nClasses, blockSize=pars.BLOCK_SIZE_COARSE, cellSize=pars.CELL_SIZE_COARSE, binary=True, loc='coarse')
+		self.fine_filter = svm.classifier(nClasses, blockSize=pars.BLOCK_SIZE_FINE, cellSize=pars.CELL_SIZE_FINE, binary=True, loc='fine')
 
 
-
-	def getData(fol, local=True):
-		return cd.getDataSet(fol, self.nClasses, self.blockSize, self.cellSize, local=local, binary=self.binary)
-
-	def train(fol, local=True):
-		X,y = self.getData()
-
-		self.svc.fit(X,y)
-
-
-	def classifyImage(imgs):
-		if type(imgs) == type(""):
-			imgs =  os.path.dirname(os.path.realpath(__file__)) + '/' + imgs
-			imgs = [Image.open(imgs+'/'+f) for f in listdir(imgs) if isfile(join(imgs, f))]
-
+	def classifyImage(self, imgs):
 		if type(imgs) != type([]):
 			imgs = [imgs]
 
-		return self.predict(cd.getTestCases(imgs, blockSize=self.blockSize, cellSize=self.cellSize))
+		return self.orientation.classifyImage(imgs, self.getInterestPoints(imgs))
 
-	def predict(x):
-		if len(x.shape)==1:
-			x = [x]
+	def getInterestPoints(self, imgs):
+		return [self.extractLocation(img) for img in imgs]
 
-		return self.svc.predict(x)
+	def extractLocation(self, img):
+		return pars.FIXED_LOCATION
 
-	def save():
-		with open(self.loc, 'wb') as fid:
-			cPickle.dump(self.svc, fid)
+	
+	def train(self, fol, loc=True):
+		self.orientation.train(fol, loc)
+		self.coarse_filter.train(fol, loc)
+		self.fine_filter.train(fol, loc)
 
 
-	def load():
-		with open(self.loc, 'rb') as fid:
-			self.svc = cPickle.load(fod)
+	def save(self):
+		self.orientation.save()
+		self.coarse_filter.save()
+		self.fine_filter.save()
+
+	def load(self):
+		self.orientation.load()
+		self.coarse_filter.load()
+		self.fine_filter.load()

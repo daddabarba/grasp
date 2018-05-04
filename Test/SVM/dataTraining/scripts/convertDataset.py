@@ -65,12 +65,14 @@ def folToMat(fol, locations, target, blockSize = (2,2), cellSize = (8,8), prev=N
 	return (inputs, targets)
 #MAIN
 
-def getDataSet(fol, location, nClasses, blockSize = (2,2), cellSize = (8,8), local=True, binary=False):
+def getDataSet(fol, location, nClasses, blockSize = (2,2), cellSize = (8,8), local=True, binary=False, cls=False):
 	#Set full path
 	if local:
 		wd = os.path.dirname(os.path.realpath(__file__))
 		fol = wd+"/"+fol
 
+	if cls:
+		return (folToMat(fol, locations=location, target=0, blockSize=blockSize, cellSize=cellSize))[0]
 
 	X, y = folToMat(getTargetFol(fol,0), locations=location, target=0, blockSize=blockSize, cellSize=cellSize)
 

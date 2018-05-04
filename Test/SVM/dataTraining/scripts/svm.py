@@ -43,11 +43,11 @@ class classifier:
 
 
 
-	def getData(self, fol, local=True):
+	def getData(self, fol, local=True, cls=False):
 		location = self.getBlockPos(pars.TRAINING_LOCATION)
 		
 		print "retreiving data from folder " + fol
-		return cd.getDataSet(fol, location, self.nClasses, self.blockSize, self.cellSize, local=local, binary=self.binary)
+		return cd.getDataSet(fol, location, self.nClasses, self.blockSize, self.cellSize, local=local, binary=self.binary, cls = cls)
 
 	def train(self, fol, local=True):
 		print "Retreiving training data"

@@ -74,9 +74,14 @@ def getDataSet(fol, location, nClasses, blockSize = (2,2), cellSize = (8,8), loc
 
 	X, y = folToMat(getTargetFol(fol,0), locations=location, target=0, blockSize=blockSize, cellSize=cellSize)
 
-	for t in range(1,nClasses):
 
-		out = t if (not binary) else 1
-		X,y = folToMat(getTargetFol(fol,t),locations=location, target=t, blockSize=blockSize, cellSize=cellSize,prev=(X,y))
+	if binary:
+		X,y = folToMat(getTargetFol(fol,nClasses), locations=location, target=1, blockSize=blockSize, cellSize=cellSize, prev=(X,y))
+	else:
+
+		for t in range(1,nClasses):
+
+			#t = t if (not binary) else 1
+			X,y = folToMat(getTargetFol(fol,t),locations=location, target=t, blockSize=blockSize, cellSize=cellSize,prev=(X,y))
 
 	return X,y

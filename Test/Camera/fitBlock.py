@@ -15,12 +15,13 @@ class Kinect:
 		self.bridge = CvBridge()
 
 		self.square_size = square_size
+		print self.square_size
 
 	def process(self):
 		image_data = rospy.wait_for_message(self.image_topic, Image)
 		self.cv_image = self.bridge.imgmsg_to_cv2(image_data, "bgr8")
 
-		print self.cv_image.shape
+		#print self.cv_image.shape
 
 		self.draw_block()
 
@@ -34,9 +35,11 @@ class Kinect:
 		topLeft = tuple((center-(self.square_size/2.0)).astype(int))
 		bottomRight = tuple((center+(self.square_size/2.0)).astype(int))
 
-		#print topLeft
 
-		self.cv_image = cv2.rectangle(img=self.cv_image, pt1=topLeft, pt2=bottomRight, color=(255,0,0), thickness=3)
+		#print topLeft
+		#self.cv_image = cv2.rectangle(img=self.cv_image, pt1=(231,189), pt2 = (231+210, 189+210), color=(255,0,0), thickness=3)
+		
+		cdself.cv_image = cv2.rectangle(img=self.cv_image, pt1=topLeft, pt2=bottomRight, color=(255,0,0), thickness=3)
 		#print cv2.__version__
 
 

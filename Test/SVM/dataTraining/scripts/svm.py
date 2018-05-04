@@ -45,7 +45,7 @@ class classifier:
 
 	def getData(self, fol, local=True):
 		location = self.getBlockPos(pars.TRAINING_LOCATION)
-
+		
 		print "retreiving data from folder " + fol
 		return cd.getDataSet(fol, location, self.nClasses, self.blockSize, self.cellSize, local=local, binary=self.binary)
 
@@ -58,26 +58,49 @@ class classifier:
 
 
 	def classifyImage(self, imgs, locations):
+		imgs, locations = self.format(imgs, locations)
+
+		print "Classifying"
+		return self.predict(cd.getTestCases(imgs, locations = locations, blockSize=self.blockSize, cellSize=self.cellSize))
+
+	def getImageDF(self, imgs, locations):
+		imgs, locations = self.format(imgs, locations)
+
+		print "Classifying"
+		return self.getDF(cd.getTestCases(imgs, locations = locations, blockSize=self.blockSize, cellSize=self.cellSize))
+
+	def format(self, imgs, locations):
 		if type(imgs) == type(""):
 			imgs =  os.path.dirname(os.path.realpath(__file__)) + '/' + imgs
 			print "Extracting images from path " + imgs
-			imgs = [cv2.imread(imgs+'/'+f) for f in listdir(imgs) if isfile(join(imgs, f))]
+			imgs = [cv2.imread(imgs)]
 
 		if type(imgs) != type([]):
 			print "Converting to list"
 			imgs = [imgs]
 
+		if type(locations) != type([]):
+			locations = [locations]
+
 		locations = [self.getBlockPos(loc) for loc in locations]
 
-		print "Classifying"
-		return self.predict(cd.getTestCases(imgs, locations = locations, blockSize=self.blockSize, cellSize=self.cellSize))
+		return (imgs, locations)
 
 	def predict(self, x):
 		print "Predicting class"
 		if len(x.shape)==1:
+			print "Making x a list"
 			x = [x]
 
 		return self.svc.predict(x)
+
+	def getDF(self, x):
+		print "Predicting class"
+		if len(x.shape)==1:
+			print "Making x a list"
+			x = [x]
+
+		return self.svc.decision_function(x)
 
 
 	def getBlockPos(self, position):
@@ -100,4 +123,4 @@ class classifier:
 	def load(self):
 		print "Loading from " + self.loc
 		with open(self.loc, 'rb') as fid:
-			self.svc = cPickle.load(fod)
+			self.svc = cPickle.load(fid)

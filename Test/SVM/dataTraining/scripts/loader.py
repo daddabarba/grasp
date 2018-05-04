@@ -1,13 +1,9 @@
 import classifier 
-from skimage import data
 
 import cv2
 
-img = data.astronaut() #Just a test image
 
+cfr = classifier.classifier(19)
+#cfr.train("Data")
 
-cfr = classifier.classifier(4)
-
-cfr.train("ExData")
-
-print cfr.classifyImage(img)
+cfr.classifyImage("Data/1/img1.png")

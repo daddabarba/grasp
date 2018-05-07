@@ -23,11 +23,6 @@ class classifier:
 
 		for cls in range(1,nClasses):
 
-			print "-------------------------------------------------------------"
-			print len(pars.GAMMA_INTERMEDIATE)
-			print cls-1
-			print "-----------------------------------------------------------"
-
 			self.intermediate_filter.append(svm.classifier(cls, blockSize=pars.BLOCK_SIZE_INTERMEDIATE, cellSize=pars.CELL_SIZE_INTERMEDIATE, binary=True, loc='pickle/int/intermediate_'+str(cls), gamma=pars.GAMMA_INTERMEDIATE[cls-1]))
 			self.fine_filter.append(svm.classifier(cls, blockSize=pars.BLOCK_SIZE_FINE, cellSize=pars.CELL_SIZE_FINE, binary=True, loc='pickle/fine/fine_'+str(cls), gamma=pars.GAMMA_FINE[cls-1]))
 
@@ -62,7 +57,7 @@ class classifier:
 		#print list(activations)
 
 		best_guess = 0
-		while(best_guess<len(activations) and self.getSecondOpinion(xi, best_guess)==0 and self.getThirdOpinion(xf, best_guess)==0):
+		while(best_guess<len(activations) and (self.getSecondOpinion(xi, best_guess)==0 or self.getThirdOpinion(xf, best_guess)==0)):
 			best_guess += 1
 
 		if(best_guess>=len(activations)):

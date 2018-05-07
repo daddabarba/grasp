@@ -13,7 +13,7 @@ import cPickle
 
 class classifier:
 
-	def __init__(self, nClasses, blockSize=pars.BLOCK_SIZE, cellSize=pars.CELL_SIZE, loc=None, binary=False):
+	def __init__(self, nClasses, blockSize=pars.BLOCK_SIZE, cellSize=pars.CELL_SIZE, loc=None, binary=False, gamma = pars.GAMMA):
 		print "setting nuber of classes to " + str(nClasses)
 		self.nClasses = nClasses
 
@@ -28,7 +28,7 @@ class classifier:
 		
 
 		print "Adding Support Vector Machine"
-		self.svc = SVC()
+		self.svc = SVC(gamma=gamma)
 
 		if loc:
 			self.loc = os.path.dirname(os.path.realpath(__file__)) + '/' + loc
@@ -69,6 +69,7 @@ class classifier:
 		print "Classifying"
 		return self.getDF(cd.getTestCases(imgs, locations = locations, blockSize=self.blockSize, cellSize=self.cellSize))
 
+
 	def format(self, imgs, locations):
 		if type(imgs) == type(""):
 			imgs =  os.path.dirname(os.path.realpath(__file__)) + '/' + imgs
@@ -92,7 +93,7 @@ class classifier:
 			print "Making x a list"
 			x = [x]
 
-		return self.svc.predict(x)
+		return self.svc.predict(x)[0]
 
 	def getDF(self, x):
 		print "Predicting class"
@@ -100,7 +101,7 @@ class classifier:
 			print "Making x a list"
 			x = [x]
 
-		return self.svc.decision_function(x)
+		return self.svc.decision_function(x)[0]
 
 
 	def getBlockPos(self, position):

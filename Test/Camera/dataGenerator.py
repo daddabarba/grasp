@@ -50,6 +50,16 @@ class Kinect:
 		cv2.imshow('Kinect data', self.cv_image)
 		cv2.waitKey(1)
 
+	def crop(self):
+		return (self.cv_image[topLeft[1]+10:bottomRight[1]+10, topLeft[0]+10:bottomRight[0]+10, :]).copy()
+
+	#HORIZONTAL
+	def changeCropped(self, cropped):
+		return cv2.flip(cropped, 1)
+
+	def gitter(self, topLeft, bottomRight, cr, cc):
+		return (self.cv_image[topLeft[1]+cr:bottomRight[1]+cr, topLeft[0]+cc:bottomRight[0]+cc, :]).copy()
+
 	def draw_block(self):
 		#shape = self.cv_image.shape
 		center = numpy.array(pars.FIXED_LOCATION)
@@ -63,13 +73,18 @@ class Kinect:
 		#print topLeft
 		#print bottomRight
 
-		print self.cv_image.shape
-
-		#print topLeft
-		#self.cv_image = cv2.rectangle(img=self.cv_image, pt1=(231,189), pt2 = (231+210, 189+210), color=(255,0,0), thickness=3)
+		cropped = self.gitter(topLeft, bottomRight, 10,10)
+		cropped = self.changeCropped(cropped)
+		#cropped = self.changeCropped(cropped)
 		
+		for r in range(len(cropped)):
+			for c in range(len(cropped[0])):
+				self.cv_image[r+topLeft[1]][c+topLeft[0]] = cropped[r][c]
+
 		self.cv_image = cv2.rectangle(img=self.cv_image, pt1=topLeft, pt2=bottomRight, color=(255,0,0), thickness=3)
-		#print cv2.__version__
+		#self.cv_image = cropped
+
+
 
 
 block_size = int(sys.argv[1])

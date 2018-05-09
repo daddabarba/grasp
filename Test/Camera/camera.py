@@ -8,7 +8,7 @@ from sensor_msgs.msg import Image
 
 class Kinect:
 	def __init__(self):
-		self.image_topic = '/camera/rgb/image_raw'
+		self.image_topic = '/camera2/rgb/image_raw'
 		self.bridge = CvBridge()
 
 	def process(self):

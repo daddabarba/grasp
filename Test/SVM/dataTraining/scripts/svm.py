@@ -88,7 +88,7 @@ class classifier:
 		return (imgs, locations)
 
 	def predict(self, x):
-		print "Predicting class"
+		#print "Predicting class"
 		if len(x.shape)==1:
 			print "Making x a list"
 			x = [x]

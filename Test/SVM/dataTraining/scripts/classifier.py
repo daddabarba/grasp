@@ -54,10 +54,11 @@ class classifier:
 		activations = self.orientation.getDF(x)
 		activations = sorted(list(enumerate(activations)), key=lambda tup: tup[1])[::-1]
 
-		#print list(activations)
+		for act in activations:
+			print list(act)
 
 		best_guess = 0
-		while(best_guess<len(activations) and (self.getSecondOpinion(xi, best_guess)==0 or self.getThirdOpinion(xf, best_guess)==0)):
+		while(best_guess<len(activations) and (self.getSecondOpinion(xi, activations[best_guess][0])==0)):
 			best_guess += 1
 
 		if(best_guess>=len(activations)):
@@ -86,14 +87,16 @@ class classifier:
 		self.orientation.svc.fit(X,y)
 
 		for i in range(self.nClasses-1):
-			self.intermediate_filter[i].svc.fit(np.vstack((XInt[0], XInt[i])), [0]*sizes[0] + [1]*sizes[i])
-			self.fine_filter[i].svc.fit(np.vstack((XFine[0], XFine[i])), [0] * sizes[0] + [1] * sizes[i])
+			self.intermediate_filter[i].svc.fit(np.vstack((XInt[0], XInt[i+1])), [0]*sizes[0] + [1]*sizes[i+1])
+			self.fine_filter[i].svc.fit(np.vstack((XFine[0], XFine[i+1])), [0] * sizes[0] + [1] * sizes[i+1])
 
 		'''
 		for i in range(self.nClasses-1):
 			self.intermediate_filter[i].train(fol, loc)
 			self.fine_filter[i].train(fol, loc)
 		'''
+
+		#return XFine[6] , 6
 
 	def getData(self, fol):
 		X, XInt, XFine = self.orientation.getData(fol + '/' + str(1), cls=True), [], []

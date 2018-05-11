@@ -10,6 +10,30 @@ import classifier
 
 import cv2
 
+
+
+def shufflePatterns(X,y):
+	nPatterns = len(X)
+
+	indexes = list(range(nPatterns))
+	rand.shuffle(indexes)
+
+	newX, newY = [], []
+
+	for r in indexes:
+		newX.append(X[r])
+		newY.append(y[r])
+
+	return np.array(newX), np.array(newY)
+
+def getSub(x, p):
+	nPatterns = int(len(x)*p)
+	return x[:nPatterns]
+
+def getValidation(X,y, size):
+	X,y = shufflePatterns(X,y)
+	return getSub(X, size), getSub(y, size)
+
 nClasses = int(sys.argv[1])
 fol = sys.argv[2]
 
@@ -34,15 +58,17 @@ for i in range(1,nClasses):
 	X = np.vstack((XList[0], XList[i]))
 	y = [0]*len(XList[0]) + [i]*len(XList[i])
 
+	((XT,XV),(YT,YV)) = getValidation(X,y, trainingSize)
+
 	#Fit
 	max = (-1,-1)
 	for g in range(1,10):
 		gamma = float(g)/10.0 * (end-start) + start
 
 		cfr = svm.classifier(i, blockSize=pars.BLOCK_SIZE_FINE, cellSize=pars.CELL_SIZE_FINE, loc='pickle/test_multi_' + str(g), gamma=gamma, binary=True)
-		cfr.svc.fit(X,y)
+		cfr.svc.fit(XT,YT)
 
-		score = cfr.svc.score(X,y)
+		score = cfr.svc.score(XV,YT)
 
 		if(score> max[0]):
 			max = (score, gamma, g)

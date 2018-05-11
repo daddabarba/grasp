@@ -13,12 +13,20 @@ import sys
 import numpy as np
 import pars
 
+import copy
+
+from scipy.ndimage import interpolation
+
+LM = 20
+
 wd = os.path.dirname(os.path.realpath(__file__))
 fol = wd+'/'+(sys.argv)[1]
 
 print "Looking at " + fol
 
 reflection = { 0:0, 1:1, 2:9, 3:8, 4:7, 5:6, 6:5, 7:4, 8:3, 9:2 }
+
+angles = [-10,10]
 
 gitterSize = range(1,5)
 gitterSize = [(sr,sc) for sr in gitterSize for sc in gitterSize]
@@ -84,6 +92,16 @@ def replaceCrop(img, crop):
 
 	return img
 
+def replaceLargeCrop(img, crop):
+	img = img.copy()
+
+	for r in range(len(crop)):
+			for c in range(len(crop[0])):
+				if crop[r][c][0]>0 and crop[r][c][1]>0 and crop[r][c][2]>0:
+					img[r+topLeft[1]-LM][c+topLeft[0]-LM] = crop[r][c]
+
+	return img
+
 def flip(img):
 	crop = flipCrop(cropImg(img))
 	return replaceCrop(img, crop)
@@ -92,21 +110,47 @@ def gitter(img, cr, cc):
 	crop = gitterCrop(img, cr, cc)
 	return replaceCrop(img, crop)
 
+def cropLarger(img):
+		return (img[topLeft[1]-LM:bottomRight[1]+LM, topLeft[0]-LM:bottomRight[0]+LM, :]).copy()
+
+def rotate(img, angle):
+	crop = cropLarger(img)
+	rotated = interpolation.rotate(crop, angle, reshape=False)
+
+	return replaceLargeCrop(img, rotated)
+
 def augment(img):
-	imgs = []
+	rotated = [img.copy()]
 
-	for (sr,sc) in gitterSize:
-		for (dr,dc) in gitterDirections:
-			imgs.append(gitter(img,dr*sr,dc*sc))
-			cv2.imshow('Gittered image', imgs[-1])
-			cv2.waitKey(1)
+	for angle in angles:
+		rotated.append(rotate(img, angle))
 
-	imgs.append(img)
+		#cv2.imshow('Gittered image', imgs[-1])
+		#cv2.waitKey(1)
+
+	imgs = copy.copy(rotated)
+
+
+	for pic in rotated:
+
+		visited = []
+
+		for (sr,sc) in gitterSize:
+			for (dr,dc) in gitterDirections:
+
+				location = (pic,dr*sr,dc*sc)
+
+				if not location in visited:
+					imgs.append(gitter(pic,dr*sr,dc*sc))
+					#cv2.imshow('Gittered image', imgs[-1])
+					#cv2.waitKey(1)
+
+					visited.append(location)
+
 
 	flipped = []
 	for pic in imgs:
 		flipped.append(flip(pic))
-	flipped.append(flip(img))
 
 	return (imgs, flipped)
 

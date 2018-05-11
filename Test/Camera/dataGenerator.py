@@ -9,6 +9,8 @@ import sys
 import numpy as np
 import pars
 
+from scipy.ndimage import interpolation
+
 def blockTrainPosition(cells_per_block, pixel_per_cell, position):
 		ppc = np.array(pixel_per_cell)
 		cpb = np.array(cells_per_block)
@@ -50,12 +52,20 @@ class Kinect:
 		cv2.imshow('Kinect data', self.cv_image)
 		cv2.waitKey(1)
 
-	def crop(self):
-		return (self.cv_image[topLeft[1]+10:bottomRight[1]+10, topLeft[0]+10:bottomRight[0]+10, :]).copy()
+	def crop(self, topLeft, bottomRight):
+		return (self.cv_image[topLeft[1]:bottomRight[1], topLeft[0]:bottomRight[0], :]).copy()
+
+	def cropLarger(self, topLeft, bottomRight):
+		return (self.cv_image[topLeft[1]-20:bottomRight[1]+20, topLeft[0]-20:bottomRight[0]+20, :]).copy()
 
 	#HORIZONTAL
 	def changeCropped(self, cropped):
 		return cv2.flip(cropped, 1)
+
+	def rotate(self, topLeft, bottomRight):
+		crop = self.cropLarger(topLeft, bottomRight)
+
+		return interpolation.rotate(crop, 15, reshape=False, cval=-1.0)
 
 	def gitter(self, topLeft, bottomRight, cr, cc):
 		return (self.cv_image[topLeft[1]+cr:bottomRight[1]+cr, topLeft[0]+cc:bottomRight[0]+cc, :]).copy()
@@ -73,18 +83,21 @@ class Kinect:
 		#print topLeft
 		#print bottomRight
 
-		cropped = self.gitter(topLeft, bottomRight, 10,10)
-		cropped = self.changeCropped(cropped)
+		#cropped = self.cropLarger(topLeft, bottomRight)
+		#cropped = self.gitter(topLeft, bottomRight, 10,10)
+		
+		cropped = self.rotate(topLeft, bottomRight)
 		#cropped = self.changeCropped(cropped)
+
+
 		
 		for r in range(len(cropped)):
 			for c in range(len(cropped[0])):
-				self.cv_image[r+topLeft[1]][c+topLeft[0]] = cropped[r][c]
+				if not cropped[r][c][0]<=0:
+					self.cv_image[r+topLeft[1]-20][c+topLeft[0]-20] = cropped[r][c]
 
 		self.cv_image = cv2.rectangle(img=self.cv_image, pt1=topLeft, pt2=bottomRight, color=(255,0,0), thickness=3)
 		#self.cv_image = cropped
-
-
 
 
 block_size = int(sys.argv[1])

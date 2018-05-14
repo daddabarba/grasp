@@ -2,6 +2,8 @@ import numpy
 import rospy
 import cv2
 
+import convertDataset as cd
+
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 
@@ -189,17 +191,80 @@ def saveList(target, imgs):
 
 	return serial
 
+def storeHOG(List, X, target):
+	if target in list(List.keys()):
+		List[target] = np.vstack((List[target], X))
+	else:
+		List[target] = X
+
+	return List
+
+
+
+def save(loc, obj):
+	print "Saving at " + loc
+	with open(loc, 'wb') as fid:
+		cPickle.dump(obj, fid)
+
+
+def load(loc):
+	print "Loading from " + loc
+	with open(loc, 'rb') as fid:
+		return cPickle.load(fid)
+
+
+def blockTrainPosition( pixel_per_cell, cells_per_block, position, target=1):
+	ppc = np.array(pixel_per_cell)
+	cpb = np.array(cells_per_block)
+	size = ppc * cpb
+	p = np.array(position)
+	return (p - size / 2) // ppc
+
+def getHOGs(files, ppc, cpb, target=1):
+	location = blockTrainPosition(ppc, cpb, pars.TRAINING_LOCATION)
+	return cd.folToMat("", location, target, blockSize=cpb, cellSize=ppc, files=files)[0]
+
+def getAll(files, target=1):
+	course = getHOGs(files, pars.CELL_SIZE, pars.BLOCK_SIZE, target)
+	inter = getHOGs(files, pars.CELL_SIZE_INTERMEDIATE, pars.BLOCK_SIZE_INTERMEDIATE, target)
+	fine = getHOGs(files, pars.CELL_SIZE_FINE, pars.BLOCK_SIZE_FINE, target)
+
+	return course, inter, fine
+
 nClasses = len(listdir(fol))
 print "nClasses: " + str(nClasses)
 
-for t in range(1,nClasses+1):
+
+XList, XIntList, XFineList = {}, {}, {}
+
+for t in range(1,nClasses):
 	files = getImages(fol, t)
 	print "Target: %d" % (t)
 	print "Files: " + str(len(files))
 
 	for img in files:
+		print "Generating augmented data"
 		generated, opposite = augment(img)
+		print "Data generated"
 
-		saveList(t, generated)
-		saveList(reflection[t], opposite)
+		#saveList(t, generated)
+		#saveList(reflection[t], opposite)
+
+		print "Extracting HOG features"
+		X, XInt, XFine = getAll(generated)
+		XR, XIntR, XFineR = getAll(opposite)
+		print "HOG extracted"
+
+		XList = storeHOG(XList, X, t)
+		XList = storeHOG(XList, XR, reflection[t])
+
+		XIntList = storeHOG(XIntList, XInt, t)
+		XIntList = storeHOG(XIntList, XIntR, reflection[t])
+
+		XFineList = storeHOG(XFineList, XFine, t)
+		XFineList = storeHOG(XFineList, XFine, t)
 		
+
+save("XList" , XList)
+save("XIntList" , XIntList)
+save("XFineList" , XFineList)

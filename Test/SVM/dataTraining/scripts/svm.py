@@ -13,7 +13,7 @@ import cPickle
 
 class classifier:
 
-	def __init__(self, nClasses, blockSize=pars.BLOCK_SIZE, cellSize=pars.CELL_SIZE, loc=None, binary=False, gamma = pars.GAMMA):
+	def __init__(self, nClasses, blockSize=pars.BLOCK_SIZE, cellSize=pars.CELL_SIZE, loc=None, binary=False, gamma = pars.GAMMA, C=10):
 		print "setting nuber of classes to " + str(nClasses)
 		self.nClasses = nClasses
 
@@ -28,7 +28,7 @@ class classifier:
 		
 
 		print "Adding Support Vector Machine"
-		self.svc = SVC(gamma=gamma)
+		self.svc = SVC(gamma=gamma, C=C)
 
 		if loc:
 			self.loc = os.path.dirname(os.path.realpath(__file__)) + '/' + loc
@@ -43,11 +43,11 @@ class classifier:
 
 
 
-	def getData(self, fol, local=True, cls=False):
+	def getData(self, fol, local=True, cls=False, files=None):
 		location = self.getBlockPos(pars.TRAINING_LOCATION)
 		
 		print "retreiving data from folder " + fol
-		return cd.getDataSet(fol, location, self.nClasses, self.blockSize, self.cellSize, local=local, binary=self.binary, cls = cls)
+		return cd.getDataSet(fol, location, self.nClasses, self.blockSize, self.cellSize, local=local, binary=self.binary, cls = cls, files=files)
 
 	def train(self, fol, local=True):
 		print "Retreiving training data"

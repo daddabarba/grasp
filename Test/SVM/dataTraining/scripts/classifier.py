@@ -10,10 +10,10 @@ import pars
 
 class classifier:
 
-	def __init__(self, nClasses):
+	def __init__(self, nClasses, loc="cfr"):
 
 		print "Initializing classifier"
-		self.orientation = svm.classifier(nClasses, blockSize=pars.BLOCK_SIZE, cellSize=pars.CELL_SIZE, loc='pickle/orientation')
+		self.orientation = svm.classifier(nClasses, blockSize=pars.BLOCK_SIZE, cellSize=pars.CELL_SIZE, loc='pickle/' + loc + '_orientation')
 		print "Initializing filters"
 		
 		self.intermediate_filter = []
@@ -23,8 +23,8 @@ class classifier:
 
 		for cls in range(1,nClasses):
 
-			self.intermediate_filter.append(svm.classifier(cls, blockSize=pars.BLOCK_SIZE_INTERMEDIATE, cellSize=pars.CELL_SIZE_INTERMEDIATE, binary=True, loc='pickle/int/intermediate_'+str(cls), gamma=pars.GAMMA_INTERMEDIATE[cls-1]))
-			self.fine_filter.append(svm.classifier(cls, blockSize=pars.BLOCK_SIZE_FINE, cellSize=pars.CELL_SIZE_FINE, binary=True, loc='pickle/fine/fine_'+str(cls), gamma=pars.GAMMA_FINE[cls-1]))
+			self.intermediate_filter.append(svm.classifier(cls, blockSize=pars.BLOCK_SIZE_INTERMEDIATE, cellSize=pars.CELL_SIZE_INTERMEDIATE, binary=True, loc='pickle/int/' + loc + 'intermediate_'+str(cls), gamma=pars.GAMMA_INTERMEDIATE[cls-1]))
+			self.fine_filter.append(svm.classifier(cls, blockSize=pars.BLOCK_SIZE_FINE, cellSize=pars.CELL_SIZE_FINE, binary=True, loc='pickle/fine/' + loc + 'fine_'+str(cls), gamma=pars.GAMMA_FINE[cls-1]))
 
 
 	def classifyImage(self, imgs):
@@ -76,9 +76,13 @@ class classifier:
 	def getInterestPoints(self, imgs):
 		return [pars.FIXED_LOCATION]
 	
-	def train(self, fol, loc=True):
-		#self.orientation.train(fol, loc)
-		X, XInt, XFine, sizes = self.getData(fol)
+	def train(self, fol, loc=True, files=None, data=None):
+
+		if not data:
+			#self.orientation.train(fol, loc)
+			X, XInt, XFine, sizes = self.getData(fol, files=files)
+		else:
+			X, Xint, XFine, sizes = data
 
 		y = []
 		for i in range(1,len(sizes)):
@@ -98,17 +102,17 @@ class classifier:
 
 		#return XFine[6] , 6
 
-	def getData(self, fol):
-		X, XInt, XFine = self.orientation.getData(fol + '/' + str(1), cls=True), [], []
+	def getData(self, fol, files=None):
+		X, XInt, XFine = self.orientation.getData(fol + '/' + str(1), cls=True, files=files), [], []
 
 		sizes = []
 
 		for i in range(2,self.nClasses):
-			X = np.vstack((X,self.orientation.getData(fol + '/' + str(i), cls=True)))
+			X = np.vstack((X,self.orientation.getData(fol + '/' + str(i), cls=True, files=files)))
 
 		for i in range(self.nClasses):
-			newInt = self.intermediate_filter[0].getData(fol + '/' + str(i), cls=True)
-			newFine = self.fine_filter[0].getData(fol + '/' + str(i), cls=True)
+			newInt = self.intermediate_filter[0].getData(fol + '/' + str(i), cls=True, files=files)
+			newFine = self.fine_filter[0].getData(fol + '/' + str(i), cls=True, files=files)
 
 			XInt.append(newInt)
 			XFine.append(newFine)

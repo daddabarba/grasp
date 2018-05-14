@@ -44,10 +44,12 @@ def getTestCases(imgs, locations, blockSize = (2,2), cellSize = (8,8)):
 	return X
 
 #WRAPPERS
-def folToMat(fol, locations, target, blockSize = (2,2), cellSize = (8,8), prev=None):
-	print "\n Extracting from " + fol
-	files = getImages(fol, target);
-	print "extracted " + str(len(files)) + " files" 
+def folToMat(fol, locations, target, blockSize = (2,2), cellSize = (8,8), prev=None, files=None):
+		
+	if not files:
+		print "\n Extracting from " + fol
+		files = getImages(fol, target);
+		print "extracted " + str(len(files)) + " files" 
 
 	locations = [locations]*len(files)
 
@@ -65,25 +67,25 @@ def folToMat(fol, locations, target, blockSize = (2,2), cellSize = (8,8), prev=N
 	return (inputs, targets)
 #MAIN
 
-def getDataSet(fol, location, nClasses, blockSize = (2,2), cellSize = (8,8), local=True, binary=False, cls=False):
+def getDataSet(fol, location, nClasses, blockSize = (2,2), cellSize = (8,8), local=True, binary=False, cls=False, files=None):
 	#Set full path
 	if local:
 		wd = os.path.dirname(os.path.realpath(__file__))
 		fol = wd+"/"+fol
 
 	if cls:
-		return (folToMat(fol, locations=location, target=0, blockSize=blockSize, cellSize=cellSize))[0]
+		return (folToMat(fol, locations=location, target=0, blockSize=blockSize, cellSize=cellSize, files=files))[0]
 
-	X, y = folToMat(getTargetFol(fol,0), locations=location, target=0, blockSize=blockSize, cellSize=cellSize)
+	X, y = folToMat(getTargetFol(fol,0), locations=location, target=0, blockSize=blockSize, cellSize=cellSize, files=files)
 
 
 	if binary:
-		X,y = folToMat(getTargetFol(fol,nClasses), locations=location, target=1, blockSize=blockSize, cellSize=cellSize, prev=(X,y))
+		X,y = folToMat(getTargetFol(fol,nClasses), locations=location, target=1, blockSize=blockSize, cellSize=cellSize, prev=(X,y), files=files)
 	else:
 
 		for t in range(1,nClasses):
 
 			#t = t if (not binary) else 1
-			X,y = folToMat(getTargetFol(fol,t),locations=location, target=t, blockSize=blockSize, cellSize=cellSize,prev=(X,y))
+			X,y = folToMat(getTargetFol(fol,t),locations=location, target=t, blockSize=blockSize, cellSize=cellSize,prev=(X,y), files=files)
 
 	return X,y

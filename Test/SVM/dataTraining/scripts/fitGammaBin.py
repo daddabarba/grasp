@@ -34,6 +34,12 @@ def getValidation(X,y, size):
 	X,y = shufflePatterns(X,y)
 	return getSub(X, size), getSub(y, size)
 
+def load(loc):
+	print "Loading from " +  loc
+	with open(loc, 'rb') as fid:
+		return cPickle.load(fid)
+
+
 nClasses = int(sys.argv[1])
 fol = sys.argv[2]
 
@@ -43,15 +49,18 @@ end = float(sys.argv[4])
 cfr = svm.classifier(nClasses, blockSize=pars.BLOCK_SIZE_FINE, cellSize=pars.CELL_SIZE_FINE, loc='pickle/test_multi', binary=True)
 
 #Extract features binary
-sizes = []
-XList = []
-for i in range(nClasses):
-	new = cfr.getData(fol + '/' + str(i), cls=True)
+#sizes = []
+#XList = []
+#for i in range(nClasses):
+	#new = cfr.getData(fol + '/' + str(i), cls=True)
 
-	XList.append(new)
-	sizes.append(len(new))
+	#XList.append(new)
+	#sizes.append(len(new))
 
 maxes = []
+
+
+XList = load(fol+"/XFineList")
 
 for i in range(1,nClasses):
 
@@ -62,16 +71,17 @@ for i in range(1,nClasses):
 
 	#Fit
 	max = (-1,-1)
-	for g in range(1,10):
-		gamma = float(g)/10.0 * (end-start) + start
+	for c in np.e**(np.arange(1,10)):
+		for g in range(1,10):
+			gamma = float(g)/10.0 * (end-start) + start
 
-		cfr = svm.classifier(i, blockSize=pars.BLOCK_SIZE_FINE, cellSize=pars.CELL_SIZE_FINE, loc='pickle/test_multi_' + str(g), gamma=gamma, binary=True)
-		cfr.svc.fit(XT,YT)
+			cfr = svm.classifier(i, blockSize=pars.BLOCK_SIZE_FINE, cellSize=pars.CELL_SIZE_FINE, loc='pickle/test_multi_' + str(g), gamma=gamma. C=c, binary=True)
+			cfr.svc.fit(XT,YT)
 
-		score = cfr.svc.score(XV,YT)
+			score = cfr.svc.score(XV,YV)
 
-		if(score> max[0]):
-			max = (score, gamma, g)
+			if(score> max[0]):
+				max = (score, gamma, g)
 
 
 	maxes.append(max)

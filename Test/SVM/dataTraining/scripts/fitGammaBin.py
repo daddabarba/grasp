@@ -12,6 +12,8 @@ import cv2
 
 import cPickle
 
+import random as rand
+
 def shufflePatterns(X,y):
 	nPatterns = len(X)
 
@@ -28,7 +30,7 @@ def shufflePatterns(X,y):
 
 def getSub(x, p):
 	nPatterns = int(len(x)*p)
-	return x[:nPatterns]
+	return x[:nPatterns], x[nPatterns:]
 
 def getValidation(X,y, size):
 	X,y = shufflePatterns(X,y)
@@ -46,10 +48,12 @@ fol = sys.argv[1]
 start = float(sys.argv[2])
 end = float(sys.argv[3])
 
-XList = load(fol+"/XFineList")
+XList = load(fol+"/XIntList")
 nClasses = len(XList)
 
-cfr = svm.classifier(nClasses, blockSize=pars.BLOCK_SIZE_FINE, cellSize=pars.CELL_SIZE_FINE, loc='pickle/test_multi', binary=True)
+trainingSize = 0.8
+
+cfr = svm.classifier(nClasses, blockSize=pars.BLOCK_SIZE_INTERMEDIATE, cellSize=pars.CELL_SIZE_INTERMEDIATE, loc='pickle/test_multi', binary=True)
 
 #Extract features binary
 #sizes = []
@@ -62,6 +66,9 @@ cfr = svm.classifier(nClasses, blockSize=pars.BLOCK_SIZE_FINE, cellSize=pars.CEL
 
 maxes = []
 
+print len(XList)
+for i in range(nClasses):
+	print XList[i].shape
 
 
 
@@ -72,37 +79,47 @@ for i in range(1,nClasses):
 
 	((XT,XV),(YT,YV)) = getValidation(X,y, trainingSize)
 
-	#Fit
-	max = (-1,-1)
-	for c in np.e**(np.arange(1,10)):
-		for g in range(1,10):
-			gamma = float(g)/10.0 * (end-start) + start
+	cVals = np.e**(np.arange(0,3))
+	gammaVals = (np.arange(0,3,dtype='float'))/10.0*(end-start) + start
 
-			cfr = svm.classifier(i, blockSize=pars.BLOCK_SIZE_FINE, cellSize=pars.CELL_SIZE_FINE, loc='pickle/test_multi_' + str(g), gamma=gamma. C=c, binary=True)
+	trialC = 0
+
+	#Fit
+	max = (-1,-1, -1)
+	for c in cVals:
+
+		trialG = 0
+
+		for gamma in gammaVals:
+			cfr = svm.classifier(i, blockSize=pars.BLOCK_SIZE_INTERMEDIATE, cellSize=pars.CELL_SIZE_INTERMEDIATE, loc='pickle/test_multi_' + str(i) + '_' + str(trialC) + '_' + str(trialG), gamma=gamma, C=c, binary=True)
 			cfr.svc.fit(XT,YT)
 
 			score = cfr.svc.score(XV,YV)
 
 			if(score> max[0]):
-				max = (score, gamma, g)
+				max = (score, c, gamma)
+
+			trialG += 1
+
+		trialC += 1
 
 
 	maxes.append(max)
 
 
-cfr = classifier.classifier(19)
-actualX, selection = cfr.train("Data")
+#cfr = classifier.classifier(19)
+#actualX, selection = cfr.train("Data")
 
 for max in maxes:
 	print max
 
 
 
-print len(XList)
+#print len(XList)
 
-print cfr.fine_filter[selection-1].svc.gamma
+#print cfr.fine_filter[selection-1].svc.gamma
 
-
+'''
 for i in range(1, nClasses):
 	ans = True
 	shape =  XList[i].shape
@@ -122,3 +139,5 @@ for i in range(1, nClasses):
 	y2= [0]*len(XList[0]) + [1]*len(actualX)
 
 	print str(i) + " - " + str(ans)  + " - "+ str(cfr.fine_filter[selection-1].svc.score(X,y)) + " - " + str(cfr.fine_filter[selection-1].svc.score(X2,y2))
+
+'''

@@ -84,8 +84,8 @@ maxVal = (-1,-1, -1)
 costV = []
 costT = []
 
-cVals = np.e**(np.arange(1,3))
-gammaVals = (np.arange(1,3,dtype='float'))/10.0*(end-start) + start
+cVals = np.e**(np.arange(0,3))
+gammaVals = (np.arange(0,3,dtype='float'))/10.0*(end-start) + start
 
 
 trialC = 0
@@ -100,6 +100,8 @@ for c in cVals:
 		cfr.svc.fit(XT,YT)
 
 		score = cfr.svc.score(XV,YV)
+
+		print "Gamma: " + str(gamma) + " - C: " + str(c) + " the score is " + str(score)
 
 		costV.append( score )
 		costT.append( cfr.svc.score(XT,YT) )

@@ -13,7 +13,7 @@ class classifier:
 	def __init__(self, nClasses, loc="cfr"):
 
 		print "Initializing classifier"
-		self.orientation = svm.classifier(nClasses, blockSize=pars.BLOCK_SIZE, cellSize=pars.CELL_SIZE, loc='pickle/' + loc + '_orientation')
+		self.orientation = svm.classifier(nClasses, blockSize=pars.BLOCK_SIZE, cellSize=pars.CELL_SIZE, loc='pickle/' + loc + '_orientation', gamma=pars.GAMMA, C=pars.C)
 		print "Initializing filters"
 		
 		self.intermediate_filter = []
@@ -23,8 +23,8 @@ class classifier:
 
 		for cls in range(1,nClasses):
 
-			self.intermediate_filter.append(svm.classifier(cls, blockSize=pars.BLOCK_SIZE_INTERMEDIATE, cellSize=pars.CELL_SIZE_INTERMEDIATE, binary=True, loc='pickle/int/' + loc + 'intermediate_'+str(cls), gamma=pars.GAMMA_INTERMEDIATE[cls-1]))
-			self.fine_filter.append(svm.classifier(cls, blockSize=pars.BLOCK_SIZE_FINE, cellSize=pars.CELL_SIZE_FINE, binary=True, loc='pickle/fine/' + loc + 'fine_'+str(cls), gamma=pars.GAMMA_FINE[cls-1]))
+			self.intermediate_filter.append(svm.classifier(cls, blockSize=pars.BLOCK_SIZE_INTERMEDIATE, cellSize=pars.CELL_SIZE_INTERMEDIATE, binary=True, loc='pickle/int/' + loc + 'intermediate_'+str(cls), gamma=pars.GAMMA_INTERMEDIATE[cls-1], C=pars.C_INTERMEDIATE[cls-1]))
+			self.fine_filter.append(svm.classifier(cls, blockSize=pars.BLOCK_SIZE_FINE, cellSize=pars.CELL_SIZE_FINE, binary=True, loc='pickle/fine/' + loc + 'fine_'+str(cls), gamma=pars.GAMMA_FINE[cls-1], C=pars.C_FINE[cls-1]))
 
 
 	def classifyImage(self, imgs):
@@ -82,9 +82,13 @@ class classifier:
 			#self.orientation.train(fol, loc)
 			X, XInt, XFine, sizes = self.getData(fol, files=files)
 		else:
-			X, Xint, XFine, sizes = data
+			X, XInt, XFine = data
 
-		if type(X)==type([]):
+			sizes = []
+			for i in range(self.nClasses):
+				sizes.append(len(XInt[i]))
+
+		if type(X)==type([]) or type(X)==type({}):
 			XList = X.copy()
 			X = XList[1]
 
@@ -93,14 +97,19 @@ class classifier:
 					X = np.vstack((X,XList[t]))
 
 		y = []
-		for i in range(1,len(sizes)):
+		for i in range(1,self.nClasses):
 			y += [i]*sizes[i]
-			
+		
+		print "Fitting course"	
 		self.orientation.svc.fit(X,y)
 
+		print "Fitting intermediate and fine"
 		for i in range(self.nClasses-1):
+			print "Fitting class " + str(i)
 			self.intermediate_filter[i].svc.fit(np.vstack((XInt[0], XInt[i+1])), [0]*sizes[0] + [1]*sizes[i+1])
 			self.fine_filter[i].svc.fit(np.vstack((XFine[0], XFine[i+1])), [0] * sizes[0] + [1] * sizes[i+1])
+
+		print "Training done"
 
 		'''
 		for i in range(self.nClasses-1):

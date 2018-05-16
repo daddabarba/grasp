@@ -105,7 +105,7 @@ class classifier:
 
 		print "Fitting intermediate and fine"
 		for i in range(self.nClasses-1):
-			print "Fitting class " + str(i)
+			print "Fitting class " + str(i+1)
 			self.intermediate_filter[i].svc.fit(np.vstack((XInt[0], XInt[i+1])), [0]*sizes[0] + [1]*sizes[i+1])
 			self.fine_filter[i].svc.fit(np.vstack((XFine[0], XFine[i+1])), [0] * sizes[0] + [1] * sizes[i+1])
 

@@ -14,11 +14,9 @@ import classifier
 import cPickle
 
 class Kinect:
-	def __init__(self, class_name, initial_value = 0, cfr=None):
+	def __init__(self, cfr=None):
 		self.image_topic = '/camera/rgb/image_raw'
 		self.bridge = CvBridge()
-		self.counter = initial_value
-		self.class_name = class_name
 
 		self.cfr = cfr
 
@@ -85,9 +83,9 @@ if __name__ == '__main__':
 	nClasses = len(XList)
 
 	cfr = classifier.classifier(nClasses, loc="live_cfr")
-	cfr.train("", (XList, XIntList, XFineList))
+	cfr.train("", data=(XList, XIntList, XFineList))
 
-	k = Kinect(class_name = class_name, initial_value = initial_value, cfr=cfr)
+	k = Kinect(cfr=cfr)
 	# screenThread = threading.Thread(args = (k))
 	# screenThread.run = saveThread
 

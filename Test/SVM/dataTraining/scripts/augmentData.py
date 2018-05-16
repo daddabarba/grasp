@@ -247,7 +247,7 @@ for t in range(1,nClasses):
 	for img in files:
 		print "Generating augmented data"
 		generated, opposite = augment(img)
-		print "Data generated"
+		print "Data generated: " + str(len(generated)) + " + " + str(len(opposite))
 
 		#saveList(t, generated)
 		#saveList(reflection[t], opposite)

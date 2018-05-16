@@ -63,7 +63,7 @@ X = XList[1]
 y = [1]*len(XList[1])
 
 for t in list(XList.keys()):
-	if t!= 1:
+	if t!= 1 and t>0:
 		X = np.vstack((X,XList[t]))
 		y += [t]*len(XList[t])
 

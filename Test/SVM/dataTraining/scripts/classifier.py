@@ -84,6 +84,14 @@ class classifier:
 		else:
 			X, Xint, XFine, sizes = data
 
+		if type(X)==type([]):
+			XList = X.copy()
+			X = XList[1]
+
+			for t in list(XList.keys()):
+				if t!= 1 and t>0:
+					X = np.vstack((X,XList[t]))
+
 		y = []
 		for i in range(1,len(sizes)):
 			y += [i]*sizes[i]

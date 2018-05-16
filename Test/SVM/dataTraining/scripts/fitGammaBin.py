@@ -10,7 +10,7 @@ import classifier
 
 import cv2
 
-
+import cPickle
 
 def shufflePatterns(X,y):
 	nPatterns = len(X)
@@ -40,11 +40,14 @@ def load(loc):
 		return cPickle.load(fid)
 
 
-nClasses = int(sys.argv[1])
-fol = sys.argv[2]
+#nClasses = int(sys.argv[1])
+fol = sys.argv[1]
 
-start = float(sys.argv[3])
-end = float(sys.argv[4])
+start = float(sys.argv[2])
+end = float(sys.argv[3])
+
+XList = load(fol+"/XFineList")
+nClasses = len(XList)
 
 cfr = svm.classifier(nClasses, blockSize=pars.BLOCK_SIZE_FINE, cellSize=pars.CELL_SIZE_FINE, loc='pickle/test_multi', binary=True)
 
@@ -60,7 +63,7 @@ cfr = svm.classifier(nClasses, blockSize=pars.BLOCK_SIZE_FINE, cellSize=pars.CEL
 maxes = []
 
 
-XList = load(fol+"/XFineList")
+
 
 for i in range(1,nClasses):
 

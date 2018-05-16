@@ -7,7 +7,10 @@ import sys
 
 import random as rand
 
+import  matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
+import cPickle
 
 def shufflePatterns(X,y):
 	nPatterns = len(X)
@@ -25,7 +28,7 @@ def shufflePatterns(X,y):
 
 def getSub(x, p):
 	nPatterns = int(len(x)*p)
-	return x[:nPatterns]
+	return x[:nPatterns], x[nPatterns:]
 
 def getValidation(X,y, size):
 	X,y = shufflePatterns(X,y)
@@ -39,11 +42,14 @@ def load(loc):
 
 
 
-nClasses = int(sys.argv[1])
-fol = sys.argv[2]
+#nClasses = int(sys.argv[1])
+fol = sys.argv[1]
 
-start = float(sys.argv[3])
-end = float(sys.argv[4])
+start = float(sys.argv[2])
+end = float(sys.argv[3])
+
+XList = load(fol+"/XList")
+nClasses = len(XList)
 
 cfr = svm.classifier(nClasses, blockSize=pars.BLOCK_SIZE, cellSize=pars.CELL_SIZE, loc='pickle/test_multi')
 
@@ -51,14 +57,15 @@ trainingSize = 0.8
 
 #Extract Features
 
-XList = load(fol+"/XList")
+
 
 X = XList[1]
 y = [1]*len(XList[1])
 
-for t in range(2,nClasses):
-	X = np.vastack((X,XList[t]))
-	y += [t]*len(XList[t])
+for t in list(XList.keys()):
+	if t!= 1:
+		X = np.vstack((X,XList[t]))
+		y += [t]*len(XList[t])
 
 
 #X = cfr.getData(fol + '/' + str(1), cls=True)
@@ -72,19 +79,52 @@ for t in range(2,nClasses):
 
 ((XT,XV),(YT,YV)) = getValidation(X,y, trainingSize)
 
-max = (-1,-1)
+maxVal = (-1,-1, -1)
 
-for c in np.e**(np.arange(1,10)):
-	for g in range(1,10):
-		gamma = float(g)/10.0 * (end-start) + start
+costV = []
+costT = []
 
-		cfr = svm.classifier(nClasses, blockSize=pars.BLOCK_SIZE, cellSize=pars.CELL_SIZE, loc='pickle/test_multi_' + str(g), gamma=gamma, C=c)
+cVals = np.e**(np.arange(1,3))
+gammaVals = (np.arange(1,3,dtype='float'))/10.0*(end-start) + start
+
+
+trialC = 0
+for c in cVals:
+
+	trialG = 0
+
+	for gamma in gammaVals:
+		#gamma = float(g)/10.0 * (end-start) + start
+
+		cfr = svm.classifier(nClasses, blockSize=pars.BLOCK_SIZE, cellSize=pars.CELL_SIZE, loc='pickle/test_multi_' + str(trialG) + '_' + str(trialC), gamma=gamma, C=c)
 		cfr.svc.fit(XT,YT)
 
 		score = cfr.svc.score(XV,YV)
 
-		if(score> max[0]):
-			max = (score, gamma, g)
+		costV.append( score )
+		costT.append( cfr.svc.score(XT,YT) )
+
+		if(score> maxVal[0]):
+			maxVal = (score, c, gamma)
+
+		trialG += 1
+	trialC += 1
 
 
-print max
+print maxVal
+
+pointsC, pointsG = np.meshgrid(cVals, gammaVals)
+
+plotV = np.reshape(costV, pointsC.shape)
+plotT = np.reshape(costT, pointsC.shape)
+
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+
+ax.plot_surface(pointsC, pointsG, plotV, label='Validation', linewidth=0, antialiased=False, color='blue')
+ax.plot_surface(pointsC, pointsG, plotT, label='Training', linewidth=0, antialiased=False, color='red')
+ax.plot([maxVal[1]]*(2*int(maxVal[0])+1), [maxVal[2]]*(2*int(maxVal[0])+1), np.arange(-maxVal[0], maxVal[0]+1))
+
+#ax.legend()
+
+plt.show()

@@ -87,7 +87,7 @@ costT = []
 cVals = np.e**(np.arange(0,3))
 gammaVals = (np.arange(0,3,dtype='float'))/10.0*(end-start) + start
 
-
+bestFound = False
 trialC = 0
 for c in cVals:
 
@@ -108,6 +108,15 @@ for c in cVals:
 
 		if(score> maxVal[0]):
 			maxVal = (score, c, gamma)
+
+		if(score == 1.0):
+			maxVal = (score, c, gamma)
+			print "Found best " + str(maxVal)
+			bestFound = True
+			break
+
+	if bestFound:
+		break
 
 		trialG += 1
 	trialC += 1

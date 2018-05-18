@@ -33,7 +33,7 @@ def getBlock(ppc, cpb, center):
 
 class Kinect:
 	def __init__(self, square_size):
-		self.image_topic = '/camera2/rgb/image_raw'
+		self.image_topic = '/camera/rgb/image_raw'
 		self.bridge = CvBridge()
 
 		self.square_size = square_size

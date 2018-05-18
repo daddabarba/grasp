@@ -239,7 +239,7 @@ print "nClasses: " + str(nClasses)
 
 XList, XIntList, XFineList = {}, {}, {}
 
-for t in range(1,nClasses):
+for t in range(nClasses):
 	files = getImages(fol, t)
 	print "Target: %d" % (t)
 	print "Files: " + str(len(files))

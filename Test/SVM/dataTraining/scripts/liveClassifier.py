@@ -13,6 +13,27 @@ import classifier
 
 import cPickle
 
+def blockTrainPosition(cells_per_block, pixel_per_cell, position):
+		ppc = np.array(pixel_per_cell)
+		cpb = np.array(cells_per_block)
+		size = ppc * cpb
+		p = np.array(position)
+		return (p - size / 2) // ppc
+
+def getBlock(ppc, cpb, center):
+	center = blockTrainPosition(cpb, ppc, center);
+
+	#print center
+
+	ppc = np.array(ppc)
+	cpb = np.array(cpb)
+
+	size = ppc*cpb;
+
+	#print size
+
+	return (center*ppc, size)
+
 class Kinect:
 	def __init__(self, cfr=None):
 		self.image_topic = '/camera/rgb/image_raw'
@@ -26,34 +47,39 @@ class Kinect:
 
 		#self.draw_block()
 
-		cv2.imshow('Kinect data', self.cv_image)
+		
 		key = cv2.waitKey(1)
 		if key == 13:
 			print self.classify()
+
+		self.draw_block()
+		cv2.imshow('Kinect data', self.cv_image)
+
 
 	def classify(self):
 		return self.cfr.classifyImage(self.cv_image)
 
 	def draw_block(self):
-		shape = self.cv_image.shape
-		center = numpy.array([348,318])
+		#shape = self.cv_image.shape
+		center = numpy.array(pars.FIXED_LOCATION)
 
-		print shape[:-1]
-		print center
+		#topLeft = tuple((center-(self.square_size/2.0)).astype(int))
+		topLeft = getBlock(pars.CELL_SIZE, pars.BLOCK_SIZE, pars.FIXED_LOCATION)[0]
+		bottomRight = tuple((topLeft+(self.square_size)).astype(int))
+		topLeft = tuple(topLeft)
 
-		z = center[0]
-		center[0] = center[1]
-		center[1] = z
-
-		topLeft = tuple(center - self.square_size / 2);
-		bottomRight = tuple(center + self.square_size / 2);
-
-		print topLeft;
-		print bottomRight;
 
 		#print topLeft
+		#print bottomRight
 
-		self.cv_image = cv2.rectangle(img=self.cv_image, pt1=topLeft[::-1], pt2=bottomRight[::-1], color=(255,0,0), thickness=3)
+		#print self.cv_image.shape
+
+		#print topLeft
+		#self.cv_image = cv2.rectangle(img=self.cv_image, pt1=(231,189), pt2 = (231+210, 189+210), color=(255,0,0), thickness=3)
+		
+		self.cv_image = cv2.rectangle(img=self.cv_image, pt1=topLeft, pt2=bottomRight, color=(255,0,0), thickness=3)
+		#print cv2.__version__
+
 		#print cv2.__version__
 
 def load(loc):

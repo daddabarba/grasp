@@ -63,7 +63,7 @@ class Kinect:
 		#print topLeft
 		#print bottomRight
 
-		print self.cv_image.shape
+		#print self.cv_image.shape
 
 		#print topLeft
 		#self.cv_image = cv2.rectangle(img=self.cv_image, pt1=(231,189), pt2 = (231+210, 189+210), color=(255,0,0), thickness=3)

@@ -23,4 +23,5 @@ XFineList = load(fol+'/XFineList')
 cfr.train("", data=(XList, XIntList, XFineList))
 
 print cfr.classifyImage("Data/6/img1.png")
-print cfr.classifyImage("Data/15/img1.png")
+print cfr.classifyImage("Data/10/img1.png")
+print cfr.classifyImage("Data/3/img1.png")

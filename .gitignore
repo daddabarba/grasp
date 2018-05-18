@@ -1,3 +1,7 @@
 *.pyc
 idea/*
 .idea/*
+Test/SVM/dataTraining/scripts/Data/*
+**/XFineList
+**/XIntList
+**/XList

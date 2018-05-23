@@ -112,11 +112,14 @@ if __name__ == '__main__':
 
 	fol = sys.argv[1]
 
-	XList, XIntList, XFineList = load(fol+"/XList"), load(fol+"/XIntList"), load(fol+"/XFineList")
+	#XList, XIntList, XFineList = load(fol+"/XList"), load(fol+"/XIntList"), load(fol+"/XFineList")
+	XList = load(fol+"/XList")
 	nClasses = len(XList)
 
 	cfr = classifier.classifier(nClasses, loc="live_cfr")
-	cfr.train("", data=(XList, XIntList, XFineList))
+	#cfr.train("", data=(XList, XIntList, XFineList))
+
+	#cfr.save()
 
 	k = Kinect(square_size = block_size*cell_size, cfr=cfr)
 	# screenThread = threading.Thread(args = (k))

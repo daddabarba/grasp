@@ -9,8 +9,10 @@ from sensor_msgs.msg import Image
 import sys
 import os
 
-import classifier
+import numpy as np
 
+import classifier
+import pars
 import cPickle
 
 def blockTrainPosition(cells_per_block, pixel_per_cell, position):
@@ -35,9 +37,11 @@ def getBlock(ppc, cpb, center):
 	return (center*ppc, size)
 
 class Kinect:
-	def __init__(self, cfr=None):
+	def __init__(self, square_size = 0, cfr=None):
 		self.image_topic = '/camera/rgb/image_raw'
 		self.bridge = CvBridge()
+
+		self.square_size = square_size
 
 		self.cfr = cfr
 
@@ -82,6 +86,9 @@ class Kinect:
 
 		#print cv2.__version__
 
+block_size = int(sys.argv[2])
+cell_size = int(sys.argv[3])
+
 def load(loc):
 	print "Loading from " +  loc
 	with open(loc, 'rb') as fid:
@@ -111,7 +118,7 @@ if __name__ == '__main__':
 	cfr = classifier.classifier(nClasses, loc="live_cfr")
 	cfr.train("", data=(XList, XIntList, XFineList))
 
-	k = Kinect(cfr=cfr)
+	k = Kinect(square_size = block_size*cell_size, cfr=cfr)
 	# screenThread = threading.Thread(args = (k))
 	# screenThread.run = saveThread
 

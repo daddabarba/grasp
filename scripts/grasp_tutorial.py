@@ -12,7 +12,7 @@ import math
 import numpy as np
 
 class MoveItTutorial(object):
-    def __init__(self):
+    def __init__(self, nClass):
     
         moveit_commander.roscpp_initialize(sys.argv)
         rospy.init_node("grasp_tutorial")
@@ -53,17 +53,32 @@ class MoveItTutorial(object):
         target_pose.pose.position.z = 0.04
         target_pose.pose.orientation.w = 1.0
 
+        yaw = ((nClass-1)*20)%180 # Change orientation of gripper 
+        pitch = 90
+        roll = 0
+
+        q = quaternion_from_euler(math.radians(pitch) + math.pi / 2, math.radians(roll), math.radians(yaw))
+
+        target_pose.pose.orientation.x = q[0]
+        target_pose.pose.orientation.x = q[1]
+        target_pose.pose.orientation.x = q[2]
+        target_pose.pose.orientation.x = q[3]
+
         self.scene.add_box(target_id, target_pose, target_size)
         rospy.sleep(0.5)
 
+        grasp_pose = copy(target_pose)
+
+        '''
         grasp_pose = PoseStamped()
         grasp_pose.header.frame_id = "/world"
         grasp_pose.pose.position.x = 0.2007 #0.24
         grasp_pose.pose.position.y = -0.332 #-0.32
         grasp_pose.pose.position.z = 0.07
         grasp_pose.pose.orientation.w = 1.0 
+        '''
 
-        grasps = self.make_grasps(grasp_pose, [target_id])
+        grasps = self.make_grasps(grasp_pose, [target_id], yaw)
              
         result = arm.pick(target_id, grasps)
         if result == MoveItErrorCodes.SUCCESS:
@@ -133,9 +148,8 @@ class MoveItTutorial(object):
         return g
 
 
-    def make_grasps(self, initial_pose_stamped, allowed_touch_objects):
+    def make_grasps(self, initial_pose_stamped, allowed_touch_objects, yaw):
 
-        yaw = 0 # Change orientation of gripper 
         pitch = 90
         roll = 0
 

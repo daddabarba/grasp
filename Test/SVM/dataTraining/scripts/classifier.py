@@ -65,6 +65,7 @@ class classifier:
 			print "No match found "
 			return 0
 		else:
+			print "Match at class " + str(activations[best_guess][0] + 1)
 			return activations[best_guess][0] + 1
 
 	def getSecondOpinion(self, x, cls):

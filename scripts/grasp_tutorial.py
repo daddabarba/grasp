@@ -11,6 +11,10 @@ import sys
 import math
 import numpy as np
 
+import graspPars as pars
+
+import sys
+
 class MoveItTutorial(object):
     def __init__(self, nClass):
     
@@ -176,4 +180,9 @@ class MoveItTutorial(object):
 
 
 if __name__ == "__main__":
-    moveit_tutorial = MoveItTutorial()
+	nClass = 1
+
+	if len(sys.argv)>1:
+		nClass = sys.argv[1]
+
+    moveit_tutorial = MoveItTutorial(nClass)

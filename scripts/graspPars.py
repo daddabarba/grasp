@@ -1,4 +1,4 @@
-TARGET_SIZE = [0.06, 0.06, 0.1] #[0.05, 0.16, 0.06]  # Box size
+TARGET_SIZE = [0.05, 0.16, 0.06]  
 
 TARGET_POSE = {
 	"x": 0.2007, #0.24
@@ -9,6 +9,7 @@ TARGET_POSE = {
 
 
 ORIENTATIONS = {}
+TARGET_SIZES = {}
 
 for i in range(1,11):
 
@@ -17,6 +18,10 @@ for i in range(1,11):
 		"pitch": 90,
 		"roll": 0
 	}
+
+	TARGET_SIZES[i] = TARGET_SIZE
+
+TARGET_SIZE[10] = [0.06, 0.06, 0.1]
 
 
 ORIENTATIONS_GRASP = copy(ORIENTATIONS)

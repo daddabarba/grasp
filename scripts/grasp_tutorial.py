@@ -48,7 +48,7 @@ class MoveItTutorial(object):
         rospy.sleep(1)
 
 
-        target_size = pars.TARGET_SIZE
+        target_size = copy(pars.TARGET_SIZES[nClass])
         target_pose = PoseStamped()
         target_pose.header.frame_id = "/world"
         target_pose.pose.position.x = pars.TARGET_POSE["x"]

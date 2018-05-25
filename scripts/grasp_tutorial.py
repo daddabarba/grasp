@@ -44,25 +44,15 @@ class MoveItTutorial(object):
         rospy.sleep(1)
 
 
-        target_size = [0.06, 0.06, 0.1] #[0.05, 0.16, 0.06]  # Box size
-
+        target_size = pars.TARGET_SIZE
         target_pose = PoseStamped()
         target_pose.header.frame_id = "/world"
-        target_pose.pose.position.x = 0.2007 #0.24
-        target_pose.pose.position.y = -0.332 #-0.32
-        target_pose.pose.position.z = 0.04
-        target_pose.pose.orientation.w = 1.0
+        target_pose.pose.position.x = pars.TARGET_POSE["x"]
+        target_pose.pose.position.y = pars.TARGET_POSE["y"]
+        target_pose.pose.position.z = pars.TARGET_POSE["z"]
+        target_pose.pose.orientation.w = pars.TARGET_POSE["w"]
 
-        yaw = ((nClass-1)*20)%180 # Change orientation of gripper 
-        pitch = 90
-        roll = 0
-
-        q = quaternion_from_euler(math.radians(pitch) + math.pi / 2, math.radians(roll), math.radians(yaw))
-
-        target_pose.pose.orientation.x = q[0]
-        target_pose.pose.orientation.x = q[1]
-        target_pose.pose.orientation.x = q[2]
-        target_pose.pose.orientation.x = q[3]
+       	target_pose = self.rotate(pars.ORIENTATIONS[nClass]["yaw"], pars.ORIENTATIONS[nClass]["pitch"], pars.ORIENTATIONS[nClass]["roll"])
 
         self.scene.add_box(target_id, target_pose, target_size)
         rospy.sleep(0.5)
@@ -78,7 +68,7 @@ class MoveItTutorial(object):
         grasp_pose.pose.orientation.w = 1.0 
         '''
 
-        grasps = self.make_grasps(grasp_pose, [target_id], yaw)
+        grasps = self.make_grasps(grasp_pose, [target_id])
              
         result = arm.pick(target_id, grasps)
         if result == MoveItErrorCodes.SUCCESS:
@@ -88,6 +78,17 @@ class MoveItTutorial(object):
     
         moveit_commander.roscpp_shutdown()
         moveit_commander.os._exit(0)
+
+    def rotate(pose, yaw, pitch, roll):
+    	q = quaternion_from_euler(math.radians(pitch) + math.pi / 2, math.radians(roll), math.radians(yaw))
+
+        pose.pose.orientation.x = q[0]
+        pose.pose.orientation.x = q[1]
+        pose.pose.orientation.x = q[2]
+        pose.pose.orientation.x = q[3]
+
+        return pose
+
 
     def open_gripper(self):
         t = JointTrajectory()
@@ -148,14 +149,14 @@ class MoveItTutorial(object):
         return g
 
 
-    def make_grasps(self, initial_pose_stamped, allowed_touch_objects, yaw):
+    def make_grasps(self, initial_pose_stamped, allowed_touch_objects):
 
-        pitch = 90
-        roll = 0
+    	yaw = pars.ORIENTATIONS_GRASP[self.nClass]["yaw"]
+        pitch = pars.ORIENTATIONS_GRASP[self.nClass]["pitch"]
+        roll = pars.ORIENTATIONS_GRASP[self.nClass]["roll"]
 
         grasps = []
                     
-        q = quaternion_from_euler(math.radians(pitch) + math.pi / 2, math.radians(roll), math.radians(yaw))
         g = Grasp()
         
         g.pre_grasp_posture = self.open_gripper()
@@ -163,14 +164,10 @@ class MoveItTutorial(object):
 
         g.grasp_pose = initial_pose_stamped
         
-        g.grasp_pose.header.frame_id = "/world"
-        g.grasp_pose.pose.orientation.x = q[0]
-        g.grasp_pose.pose.orientation.y = q[1]
-        g.grasp_pose.pose.orientation.z = q[2]
-        g.grasp_pose.pose.orientation.w = q[3]
+        g.grasp_pose = self.rotate(g.grasp_pose, yaw, pitch, roll)
 
-        g.pre_grasp_approach = self.make_gripper_translation_approach(0.08, 0.15)  #(0.03, 0.08) #(0.08, 0.15)
-        g.post_grasp_retreat = self.make_gripper_translation_retreat(0.1, 0.11)
+        g.pre_grasp_approach = self.make_gripper_translation_approach(*pars.APPROACH_DIRECTION)
+        g.post_grasp_retreat = self.make_gripper_translation_retreat(*pars.RETREAT_DIRECTION)
         g.allowed_touch_objects = allowed_touch_objects    
         grasps.append(g)
 

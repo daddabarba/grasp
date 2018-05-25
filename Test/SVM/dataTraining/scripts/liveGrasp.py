@@ -1,4 +1,5 @@
-import grasperimport numpy
+import grasper
+import numpy
 import rospy
 import cv2
 import threading

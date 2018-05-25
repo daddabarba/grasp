@@ -3,7 +3,7 @@ import grasp
 
 class grasper:
 
-	def __init__(self, nClasses):
+	def __init__(self, nClasses, loc):
 		self.nClasses = nClasses
 
 		self.cfr = classifier.classifier(nClasses, loc="live__cfr")

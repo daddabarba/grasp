@@ -19,7 +19,7 @@ import copy
 class grasp(object):
     def __init__(self):
         moveit_commander.roscpp_initialize(sys.argv)
-        rospy.init_node("grasp_tutorial")
+        #rospy.init_node("grasp_tutorial")
         
         self.scene = PlanningSceneInterface()
         self.scene_pub = rospy.Publisher("planning_scene", PlanningScene, queue_size=10)
@@ -33,13 +33,15 @@ class grasp(object):
         self.arm.allow_replanning(True)
         self.arm.set_pose_reference_frame("world")
 
-        self.arm.set_planning_time(5)
+        self.arm.set_planning_time(15)
     
         rospy.sleep(2)
         
         self.box1_id = "box1"
         self.target_id = "target"
 
+
+    def act_grasp(self, nClass):
         self.scene.remove_world_object(self.box1_id)
         self.scene.remove_world_object(self.target_id)
 
@@ -47,8 +49,6 @@ class grasp(object):
 
         rospy.sleep(1)
 
-
-    def act_grasp(self, nClass):
         self.nClass = nClass
 
         target_size = copy.copy(pars.TARGET_SIZES[nClass])
@@ -62,7 +62,7 @@ class grasp(object):
        	target_pose = self.rotate(target_pose, pars.ORIENTATIONS[nClass]["yaw"], pars.ORIENTATIONS[nClass]["pitch"], pars.ORIENTATIONS[nClass]["roll"])
 
         self.scene.add_box(self.target_id, target_pose, target_size)
-        rospy.sleep(0.5)
+        rospy.sleep(1.5)
 
         grasp_pose = copy.copy(target_pose)
         grasp_pose.pose.position.z = pars.GRASPING_HEIGHT
@@ -88,8 +88,8 @@ class grasp(object):
         else:
             print 'Failed'
     
-        moveit_commander.roscpp_shutdown()
-        moveit_commander.os._exit(0)
+        #moveit_commander.roscpp_shutdown()
+        #moveit_commander.os._exit(0)
 
     def rotate(self, pose, yaw, pitch, roll):
     	q = quaternion_from_euler(math.radians(pitch) + math.pi / 2, math.radians(roll), math.radians(yaw))
@@ -109,7 +109,7 @@ class grasp(object):
 
         tp = JointTrajectoryPoint()
         tp.positions = [0, 0]
-        tp.time_from_start = rospy.Duration(5.0)
+        tp.time_from_start = rospy.Duration(15.0)
         t.points.append(tp)
         return t
 
@@ -120,7 +120,7 @@ class grasp(object):
 
         tp = JointTrajectoryPoint()
         tp.positions = [1.2, 1.2] # Might need to change for real arm?
-        tp.time_from_start = rospy.Duration(5.0)
+        tp.time_from_start = rospy.Duration(15.0)
         t.points.append(tp)
         return t
 
@@ -184,3 +184,7 @@ class grasp(object):
         grasps.append(g)
 
         return grasps
+
+    def __del__(self):
+	moveit_commander.roscpp_shutdown()
+        moveit_commander.os._exit(0)

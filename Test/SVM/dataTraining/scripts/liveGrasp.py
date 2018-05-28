@@ -87,8 +87,8 @@ class Kinect:
 
 		#print cv2.__version__
 
-block_size = pars.BLOCK_SIZE
-cell_size = pars.CELL_SIZE
+block_size = pars.BLOCK_SIZE[0]
+cell_size = pars.CELL_SIZE[0]
 
 def load(loc):
 	print "Loading from " +  loc
